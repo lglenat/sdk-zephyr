@@ -81,3 +81,8 @@ void BoardCriticalSectionEnd(uint32_t *mask)
 {
 	irq_unlock(*mask);
 }
+
+uint32_t RtcGetCalendarTime(uint16_t *milliseconds)
+{
+	return k_uptime_get_32();
+}
