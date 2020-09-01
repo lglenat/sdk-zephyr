@@ -13,7 +13,6 @@ menuconfig LORA_LR1110
 	select HAS_LORAMAC_REGION_US915
 	select HAS_LORAMAC_REGION_EU868
 	select HAS_LORAMAC_ACTIVE_REGION_US915
-	select 
 	depends on SPI
 	help
 	  Enable LoRa driver for Semtech LR1110.
