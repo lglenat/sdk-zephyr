@@ -369,7 +369,7 @@ static int lr1110_lora_init(struct device *dev)
 	}
 
 	dev_data.spi_cs.gpio_pin = GPIO_CS_PIN;
-	dev_data.spi_cs.gpio_dt_flags = GPIO_CS_FLAGS;
+	// dev_data.spi_cs.gpio_dt_flags = GPIO_CS_FLAGS;
 	dev_data.spi_cs.delay = 0U;
 
 	dev_data.spi_cfg.cs = &dev_data.spi_cs;
