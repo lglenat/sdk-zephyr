@@ -92,3 +92,7 @@ void RtcBkupRead(uint32_t *data0, uint32_t *data1)
 	*data0 = k_uptime_get_32() / 1000;
 	*data1 = k_uptime_get_32() % 1000;
 }
+
+void RtcBkupWrite(uint32_t data0, uint32_t data1)
+{
+}
