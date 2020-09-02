@@ -305,7 +305,7 @@ void lr1110_board_init(const void *context, lr1110_dio_irq_handler dio_irq)
 	lr1110_hal_wait_on_busy(context);
 	k_sleep(K_MSEC(10));
 
-	lr1110_system_reset(context);
+	// lr1110_system_reset(context);
 	lr1110_hal_set_operating_mode(context, LR1110_HAL_OP_MODE_STDBY_RC);
 
 	// setup interrupt
