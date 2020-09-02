@@ -375,7 +375,7 @@ static int lr1110_lora_init(struct device *dev)
 	// dev_data.spi_cs.gpio_dt_flags = GPIO_CS_FLAGS;
 	dev_data.spi_cs.delay = 0U;
 	gpio_pin_configure(dev_data.spi_cs.gpio_dev, dev_data.spi_cs.gpio_pin,
-			   0);
+			   GPIO_OUTPUT_HIGH);
 
 	dev_data.spi_cfg.cs = NULL;
 	dev_data.spi_cfg.operation = SPI_WORD_SET(8) | SPI_TRANSFER_MSB;
