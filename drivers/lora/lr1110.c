@@ -348,7 +348,7 @@ static int lr1110_lora_init(struct device *dev)
 
 	LOG_DBG("Initializing %s", DT_INST_LABEL(0));
 
-	if (sx12xx_configure_pin(reset, GPIO_OUTPUT_INACTIVE) ||
+	if (sx12xx_configure_pin(reset, GPIO_OUTPUT_HIGH) ||
 	    sx12xx_configure_pin(busy, GPIO_INPUT) ||
 	    sx12xx_configure_pin(dio1, GPIO_INPUT | GPIO_INT_DEBOUNCE)) {
 		return -EIO;
