@@ -214,7 +214,7 @@ void lr1110_hal_reset(const void *context)
 	LOG_DBG("Resetting radio");
 	// high-low-high pulse (declared ACTIVE_LOW in device tree)
 	gpio_pin_set(dev_data.reset, GPIO_RESET_PIN, 1);
-	k_sleep(K_MSEC(1));
+	k_sleep(K_USEC(200));
 	gpio_pin_set(dev_data.reset, GPIO_RESET_PIN, 0);
 	k_sleep(K_MSEC(1));
 }
