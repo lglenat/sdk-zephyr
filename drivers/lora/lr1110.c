@@ -101,11 +101,17 @@ static int lr1110_spi_transceive(const uint8_t *req_tx, const uint8_t *req_rx,
 	const struct spi_buf_set rx = { .buffers = rx_buf,
 					.count = ARRAY_SIZE(rx_buf) };
 
+	// Set CS pin low
+	gpio_pin_set(dev_data.spi_cs.gpio_dev, GPIO_CS_PIN, 0);
+
 	if (!req_rx && !data_rx) {
 		ret = spi_write(dev_data.spi, &dev_data.spi_cfg, &tx);
 	} else {
 		ret = spi_transceive(dev_data.spi, &dev_data.spi_cfg, &tx, &rx);
 	}
+
+	// Set CS pin high
+	gpio_pin_set(dev_data.spi_cs.gpio_dev, GPIO_CS_PIN, 1);
 
 	if (ret < 0) {
 		LOG_ERR("SPI transaction failed: %i", ret);
