@@ -216,6 +216,7 @@ void lr1110_hal_reset(const void *context)
 	gpio_pin_set(dev_data.reset, GPIO_RESET_PIN, 1);
 	k_sleep(K_MSEC(1));
 	gpio_pin_set(dev_data.reset, GPIO_RESET_PIN, 0);
+	k_sleep(K_MSEC(1));
 }
 
 void lr1110_board_set_rf_tx_power(const void *context, int8_t power)
@@ -299,8 +300,9 @@ static void lr1110_dio1_irq_callback(struct device *dev,
 
 void lr1110_board_init(const void *context, lr1110_dio_irq_handler dio_irq)
 {
-	// set CS high before the reset
+	// set CS high before the reset, wait for busy to go low
 	gpio_pin_set(dev_data.spi_cs.gpio_dev, GPIO_CS_PIN, 1);
+	lr1110_hal_wait_on_busy(context);
 
 	lr1110_system_reset(context);
 	lr1110_hal_set_operating_mode(context, LR1110_HAL_OP_MODE_STDBY_RC);
