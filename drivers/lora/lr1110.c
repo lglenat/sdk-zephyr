@@ -290,7 +290,7 @@ static void lr1110_dio1_irq_callback(struct device *dev,
 void lr1110_board_init(const void *context, lr1110_dio_irq_handler dio_irq)
 {
 	// set CS high before the reset
-	gpio_pin_set(dev_data.spi_cs.gpio_dev, GPIO_CS_PIN, 0);
+	gpio_pin_set(dev_data.spi_cs.gpio_dev, GPIO_CS_PIN, 1);
 
 	lr1110_system_reset(context);
 	lr1110_hal_set_operating_mode(context, LR1110_HAL_OP_MODE_STDBY_RC);
@@ -365,19 +365,17 @@ static int lr1110_lora_init(struct device *dev)
 		return -EINVAL;
 	}
 
-#if HAVE_GPIO_CS
+	// handle CS
 	dev_data.spi_cs.gpio_dev = device_get_binding(GPIO_CS_LABEL);
 	if (!dev_data.spi_cs.gpio_dev) {
 		LOG_ERR("Cannot get pointer to %s device", GPIO_CS_LABEL);
 		return -EIO;
 	}
-
 	dev_data.spi_cs.gpio_pin = GPIO_CS_PIN;
 	// dev_data.spi_cs.gpio_dt_flags = GPIO_CS_FLAGS;
 	dev_data.spi_cs.delay = 0U;
 
-	dev_data.spi_cfg.cs = &dev_data.spi_cs;
-#endif
+	dev_data.spi_cfg.cs = NULL;
 	dev_data.spi_cfg.operation = SPI_WORD_SET(8) | SPI_TRANSFER_MSB;
 	dev_data.spi_cfg.frequency = DT_INST_PROP(0, spi_max_frequency);
 	dev_data.spi_cfg.slave = DT_INST_REG_ADDR(0);
