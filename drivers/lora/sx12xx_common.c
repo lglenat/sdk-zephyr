@@ -122,9 +122,9 @@ int sx12xx_lora_config(struct device *dev, struct lora_modem_config *config)
 	} else {
 		/* TODO: Get symbol timeout value from config parameters */
 		Radio.SetRxConfig(MODEM_LORA, config->bandwidth,
-				  config->datarate, config->coding_rate,
-				  0, config->preamble_len, 10, false, 0,
-				  false, 0, 0, false, true);
+				  config->datarate, config->coding_rate, 0,
+				  config->preamble_len, 10, false, 0, false, 0,
+				  0, false, true);
 	}
 
 	return 0;
@@ -143,7 +143,7 @@ int sx12xx_init(struct device *dev)
 
 	dev_data.events.TxDone = sx12xx_ev_tx_done;
 	dev_data.events.RxDone = sx12xx_ev_rx_done;
-	Radio.Init(&dev_data.events);
+	// Radio.Init(&dev_data.events);
 
 	return 0;
 }
