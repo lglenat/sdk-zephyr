@@ -290,7 +290,7 @@ static void lr1110_dio1_irq_callback(struct device *dev,
 void lr1110_board_init(const void *context, lr1110_dio_irq_handler dio_irq)
 {
 	// set CS high before the reset
-	gpio_pin_set(dev_data.spi_cs.gpio_dev, GPIO_CS_PIN, 1);
+	gpio_pin_set(dev_data.spi_cs.gpio_dev, GPIO_CS_PIN, 0);
 
 	lr1110_system_reset(context);
 	lr1110_hal_set_operating_mode(context, LR1110_HAL_OP_MODE_STDBY_RC);
