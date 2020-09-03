@@ -189,26 +189,6 @@ uint32_t lr1110_board_get_tcxo_wakeup_time(const void *context)
 	return TCXO_POWER_STARTUP_DELAY_MS;
 }
 
-static void lr1110_baord_init_tcxo_io(const void *context)
-{
-#if HAVE_TCXO
-	LOG_DBG("TCXO on shield");
-	lr1110_system_set_tcxo_mode(
-		context, LR1110_SYSTEM_TCXO_SUPPLY_VOLTAGE_1_8V,
-		(lr1110_board_get_tcxo_wakeup_time(context) * 1000) / 30.52);
-
-	uint8_t calib_params = LR1110_SYSTEM_CALIBRATE_LF_RC_MASK |
-			       LR1110_SYSTEM_CALIBRATE_HF_RC_MASK |
-			       LR1110_SYSTEM_CALIBRATE_PLL_MASK |
-			       LR1110_SYSTEM_CALIBRATE_ADC_MASK |
-			       LR1110_SYSTEM_CALIBRATE_IMG_MASK |
-			       LR1110_SYSTEM_CALIBRATE_PLL_TX_MASK;
-	lr1110_system_calibrate(context, calib_params);
-#else
-	LOG_DBG("No TCXO configured");
-#endif
-}
-
 void lr1110_hal_reset(const void *context)
 {
 	LOG_DBG("Resetting radio");
@@ -313,7 +293,7 @@ void lr1110_board_init(const void *context, lr1110_dio_irq_handler dio_irq)
 
 	lr1110_system_set_regmode(context, LR1110_SYSTEM_REG_MODE_DCDC );
 
-	lr1110_system_rfswitch_cfg_t rf_switch_setup = { 0 };
+	lr1110_system_rfswitch_config_t rf_switch_setup = { 0 };
 	rf_switch_setup.enable                       = DEMO_COMMON_RF_SWITCH_ENABLE;
 	rf_switch_setup.standby                      = DEMO_COMMON_RF_SWITCH_STANDBY;
 	rf_switch_setup.tx                           = DEMO_COMMON_RF_SWITCH_TX;
@@ -323,7 +303,7 @@ void lr1110_board_init(const void *context, lr1110_dio_irq_handler dio_irq)
 	lr1110_system_set_dio_as_rf_switch(context, &rf_switch_setup );
 
 	lr1110_system_set_tcxo_mode(context, LR1110_SYSTEM_TCXO_CTRL_3_0V, 500 );
-	lr1110_system_cfg_lfclk(context, LR1110_SYSTEM_LFCLK_XTAL, true );
+	lr1110_system_config_lfclk(context, LR1110_SYSTEM_LFCLK_XTAL, true );
 	lr1110_system_clear_errors(context);
 	lr1110_system_calibrate(context, 0x3F );
 
@@ -331,7 +311,7 @@ void lr1110_board_init(const void *context, lr1110_dio_irq_handler dio_irq)
 	lr1110_system_get_errors(context, &errors );
 	LOG_INF("errors post calibrate: %" PRIu16, errors);
 	lr1110_system_clear_errors(context);
-	lr1110_system_clear_irq_status(context, LR1110_SYSTEM_IRQ_ALL_MASK );
+	lr1110_system_clear_irq(context, LR1110_SYSTEM_IRQ_ALL_MASK );
 
 	lr1110_system_stat1_t stat1;
 	lr1110_system_stat2_t stat2;
