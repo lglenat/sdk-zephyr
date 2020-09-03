@@ -212,11 +212,10 @@ static void lr1110_baord_init_tcxo_io(const void *context)
 void lr1110_hal_reset(const void *context)
 {
 	LOG_DBG("Resetting radio");
-	// high-low-high pulse (declared ACTIVE_LOW in device tree)
-	gpio_pin_set(dev_data.reset, GPIO_RESET_PIN, 1);
-	k_sleep(K_MSEC(1));
+	// high-low-high pulse (declared ACTIVE_HIGH in device tree)
 	gpio_pin_set(dev_data.reset, GPIO_RESET_PIN, 0);
-	k_sleep(K_MSEC(300));
+	k_sleep(K_MSEC(1));
+	gpio_pin_set(dev_data.reset, GPIO_RESET_PIN, 1);
 }
 
 void lr1110_board_set_rf_tx_power(const void *context, int8_t power)
@@ -305,7 +304,7 @@ void lr1110_board_init(const void *context, lr1110_dio_irq_handler dio_irq)
 	lr1110_hal_wait_on_busy(context);
 	k_sleep(K_MSEC(10));
 
-	// lr1110_system_reset(context);
+	lr1110_system_reset(context);
 	lr1110_hal_set_operating_mode(context, LR1110_HAL_OP_MODE_STDBY_RC);
 
 	// setup interrupt
