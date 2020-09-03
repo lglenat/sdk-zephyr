@@ -291,7 +291,7 @@ void lr1110_board_init(const void *context, lr1110_dio_irq_handler dio_irq)
 	lr1110_hal_wait_on_busy(context);
 	lr1110_hal_set_operating_mode(context, LR1110_HAL_OP_MODE_STDBY_RC);
 
-	lr1110_system_set_regmode(context, LR1110_SYSTEM_REG_MODE_DCDC );
+	lr1110_system_set_regmode(context, LR1110_SYSTEM_REGMODE_DCDC_CONVERTER );
 
 	lr1110_system_rfswitch_config_t rf_switch_setup = { 0 };
 	rf_switch_setup.enable                       = DEMO_COMMON_RF_SWITCH_ENABLE;
