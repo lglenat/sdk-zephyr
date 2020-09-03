@@ -87,12 +87,16 @@ uint32_t RtcGetCalendarTime(uint16_t *milliseconds)
 	return k_uptime_get_32();
 }
 
+static uint32_t rtc_backup_s, rtc_backup_ms;
+
 void RtcBkupRead(uint32_t *data0, uint32_t *data1)
 {
-	*data0 = k_uptime_get_32() / 1000;
-	*data1 = k_uptime_get_32() % 1000;
+	*data0 = rtc_backup_s;
+	*data1 = rtc_backup_ms;
 }
 
 void RtcBkupWrite(uint32_t data0, uint32_t data1)
 {
+	rtc_backup_s = data0;
+	rtc_backup_ms = data1;
 }
