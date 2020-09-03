@@ -303,7 +303,7 @@ void lr1110_board_init(const void *context, lr1110_dio_irq_handler dio_irq)
 	lr1110_system_set_dio_as_rf_switch(context, &rf_switch_setup );
 
 	lr1110_system_set_tcxo_mode(context, LR1110_SYSTEM_TCXO_SUPPLY_VOLTAGE_3_0V, 500 );
-	lr1110_system_config_lfclk(context, LR1110_SYSTEM_LFCLK_XTAL, true );
+	lr1110_system_config_lfclk(context, LR1110_SYSTEM_LFCLK_RC, true );
 	lr1110_system_clear_errors(context);
 	lr1110_system_calibrate(context, 0x3F );
 
