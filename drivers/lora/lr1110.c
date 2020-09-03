@@ -232,6 +232,7 @@ lr1110_hal_status_t lr1110_hal_wakeup(const void *context)
 	     LR1110_HAL_OP_MODE_RX_DC)) {
 		// Wakeup radio: high-low-high pulse on CS
 		gpio_pin_set(dev_data.spi_cs.gpio_dev, GPIO_CS_PIN, 0);
+		k_sleep(K_MSEC(1));
 		gpio_pin_set(dev_data.spi_cs.gpio_dev, GPIO_CS_PIN, 1);
 
 		// Radio is awake in STDBY_RC mode
