@@ -297,23 +297,41 @@ static void lr1110_dio1_irq_callback(struct device *dev,
 	}
 }
 
+#define DEMO_COMMON_RF_SWITCH_ENABLE \
+    ( LR1110_SYSTEM_RFSW0_HIGH | LR1110_SYSTEM_RFSW1_HIGH | LR1110_SYSTEM_RFSW2_HIGH | LR1110_SYSTEM_RFSW3_HIGH )
+#define DEMO_COMMON_RF_SWITCH_STANDBY 0x00
+#define DEMO_COMMON_RF_SWITCH_RX ( LR1110_SYSTEM_RFSW0_HIGH )
+#define DEMO_COMMON_RF_SWITCH_TX ( LR1110_SYSTEM_RFSW0_HIGH | LR1110_SYSTEM_RFSW1_HIGH )
+#define DEMO_COMMON_RF_SWITCH_WIFI ( LR1110_SYSTEM_RFSW3_HIGH )
+#define DEMO_COMMON_RF_SWITCH_GNSS ( LR1110_SYSTEM_RFSW2_HIGH )
+
 void lr1110_board_init(const void *context, lr1110_dio_irq_handler dio_irq)
 {
 	lr1110_system_reset(context);
-
+	lr1110_hal_wait_on_busy(context);
 	lr1110_hal_set_operating_mode(context, LR1110_HAL_OP_MODE_STDBY_RC);
 
-	// setup interrupt
-	dev_data.radio_dio_irq = dio_irq;
-	k_work_init(&dev_data.dio1_irq_work, lr1110_dio1_irq_work_handler);
-	gpio_init_callback(&dev_data.dio1_irq_callback,
-			   lr1110_dio1_irq_callback, BIT(GPIO_DIO1_PIN));
-	if (gpio_add_callback(dev_data.dio1, &dev_data.dio1_irq_callback) < 0) {
-		LOG_ERR("Could not set GPIO callback for DIO1 interrupt.");
-		return;
-	}
-	gpio_pin_interrupt_configure(dev_data.dio1, GPIO_DIO1_PIN,
-				     GPIO_INT_EDGE_TO_ACTIVE);
+	lr1110_system_set_regmode(context, LR1110_SYSTEM_REG_MODE_DCDC );
+
+	lr1110_system_rfswitch_cfg_t rf_switch_setup = { 0 };
+	rf_switch_setup.enable                       = DEMO_COMMON_RF_SWITCH_ENABLE;
+	rf_switch_setup.standby                      = DEMO_COMMON_RF_SWITCH_STANDBY;
+	rf_switch_setup.tx                           = DEMO_COMMON_RF_SWITCH_TX;
+	rf_switch_setup.rx                           = DEMO_COMMON_RF_SWITCH_RX;
+	rf_switch_setup.wifi                         = DEMO_COMMON_RF_SWITCH_WIFI;
+	rf_switch_setup.gnss                         = DEMO_COMMON_RF_SWITCH_GNSS;
+	lr1110_system_set_dio_as_rf_switch(context, &rf_switch_setup );
+
+	lr1110_system_set_tcxo_mode(context, LR1110_SYSTEM_TCXO_CTRL_3_0V, 500 );
+	lr1110_system_cfg_lfclk(context, LR1110_SYSTEM_LFCLK_XTAL, true );
+	lr1110_system_clear_errors(context);
+	lr1110_system_calibrate(context, 0x3F );
+
+	lr1110_system_errors_t errors = 0;
+	lr1110_system_get_errors(context, &errors );
+	LOG_INF("errors post calibrate: %" PRIu16, errors);
+	lr1110_system_clear_errors(context);
+	lr1110_system_clear_irq_status(context, LR1110_SYSTEM_IRQ_ALL_MASK );
 
 	lr1110_system_stat1_t stat1;
 	lr1110_system_stat2_t stat2;
@@ -321,25 +339,11 @@ void lr1110_board_init(const void *context, lr1110_dio_irq_handler dio_irq)
 	lr1110_system_get_status(context, &stat1, &stat2, &irq);
 	lr1110_system_version_t version;
 	lr1110_system_get_version(context, &version);
-	lr1110_system_errors_t errors = { 0 };
+	LOG_INF("LR1110 version: %" PRIu8 " - %" PRIu8" - %" PRIu16, version.hw, version.type, version.fw);
+	errors = 0;
 	lr1110_system_get_errors(context, &errors);
+	LOG_INF("errors post version: %" PRIu16, errors);
 	lr1110_system_clear_errors(context);
-
-	// Initialize TCXO control
-	lr1110_baord_init_tcxo_io(context);
-
-	// Initialize RF switch control
-	lr1110_system_rfswitch_config_t rf_switch_configuration;
-	rf_switch_configuration.enable =
-		LR1110_SYSTEM_RFSW0_HIGH | LR1110_SYSTEM_RFSW1_HIGH;
-	rf_switch_configuration.standby = 0;
-	rf_switch_configuration.rx = LR1110_SYSTEM_RFSW0_HIGH;
-	rf_switch_configuration.tx =
-		LR1110_SYSTEM_RFSW0_HIGH | LR1110_SYSTEM_RFSW1_HIGH;
-	rf_switch_configuration.wifi = 0;
-	rf_switch_configuration.gnss = 0;
-
-	lr1110_system_set_dio_as_rf_switch(context, &rf_switch_configuration);
 
 	lr1110_radio_pa_config_t paConfig = {
 		.pa_sel = LR1110_RADIO_PA_SEL_LP,
@@ -352,6 +356,23 @@ void lr1110_board_init(const void *context, lr1110_dio_irq_handler dio_irq)
 	// Set packet type
 	lr1110_radio_packet_types_t packet_type = LR1110_RADIO_PACKET_LORA;
 	lr1110_radio_set_packet_type(context, packet_type);
+
+	errors = 0;
+	lr1110_system_get_errors(context, &errors);
+	LOG_INF("errors post packet type: %" PRIu16, errors);
+	lr1110_system_clear_errors(context);
+
+	// setup interrupt
+	dev_data.radio_dio_irq = dio_irq;
+	k_work_init(&dev_data.dio1_irq_work, lr1110_dio1_irq_work_handler);
+	gpio_init_callback(&dev_data.dio1_irq_callback,
+			   lr1110_dio1_irq_callback, BIT(GPIO_DIO1_PIN));
+	if (gpio_add_callback(dev_data.dio1, &dev_data.dio1_irq_callback) < 0) {
+		LOG_ERR("Could not set GPIO callback for DIO1 interrupt.");
+		return;
+	}
+	gpio_pin_interrupt_configure(dev_data.dio1, GPIO_DIO1_PIN,
+				     GPIO_INT_EDGE_TO_ACTIVE);
 }
 
 static int lr1110_lora_init(struct device *dev)
