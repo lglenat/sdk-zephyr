@@ -265,9 +265,6 @@ static void lr1110_dio1_irq_work_handler(struct k_work *work)
 	}
 
 	dev_data.radio_dio_irq(NULL);
-	if (Radio.IrqProcess) {
-		Radio.IrqProcess();
-	}
 }
 
 static void lr1110_dio1_irq_callback(struct device *dev,
